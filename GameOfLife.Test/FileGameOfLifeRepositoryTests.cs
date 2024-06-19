@@ -1,6 +1,10 @@
-﻿using GameOfLife.Models;
+﻿using GameOfLife.Controllers;
+using GameOfLife.Models;
 using GameOfLife.Repositories;
+using GameOfLife.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System.IO;
 using System.Text.Json;
 
@@ -11,6 +15,7 @@ namespace GameOfLifeTests
     {
         private string _storagePath;
         private FileGameOfLifeRepository _repository;
+        private Mock<ILogger<FileGameOfLifeRepository>> _mockLogger;
 
         [TestInitialize]
         public void TestInitialize()
@@ -21,8 +26,8 @@ namespace GameOfLifeTests
                 Directory.Delete(_storagePath, true);
             }
             Directory.CreateDirectory(_storagePath);
-
-            _repository = new FileGameOfLifeRepository(_storagePath);
+            _mockLogger = new Mock<ILogger<FileGameOfLifeRepository>>();
+            _repository = new FileGameOfLifeRepository(_storagePath,_mockLogger.Object);
         }
 
         [TestMethod]

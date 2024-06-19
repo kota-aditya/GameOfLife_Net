@@ -1,21 +1,27 @@
 ﻿using GameOfLife.Models;
 using GameOfLife.Repositories;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GameOfLife.Services
 {
     public class GameOfLifeService : IGameOfLifeService
     {
         private readonly IGameOfLifeRepository _repository;
+        private readonly ILogger<GameOfLifeService> _logger;
 
-        public GameOfLifeService(IGameOfLifeRepository repository)
+        public GameOfLifeService(IGameOfLifeRepository repository, ILogger<GameOfLifeService> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         public string AddBoard(GameOfLifeBoard board)
         {
             board.Id = Guid.NewGuid().ToString();
             _repository.SaveBoard(board);
+            _logger.LogInformation("Board with ID {BoardId} added.", board.Id);
             return board.Id;
         }
 
@@ -45,6 +51,7 @@ namespace GameOfLife.Services
             }
             var nextBoard = new GameOfLifeBoard { Id = board.Id, State = newState, Rows = board.Rows, Columns = board.Columns };
             _repository.SaveBoard(nextBoard);
+            _logger.LogInformation("Next state calculated for board ID {BoardId}.", board.Id);
             return nextBoard;
         }
 
@@ -55,6 +62,7 @@ namespace GameOfLife.Services
             {
                 currentState = GetNextState(currentState);
             }
+            _logger.LogInformation("{NthState}th state calculated for board ID {BoardId}.", n, board.Id);
             return currentState;
         }
 
@@ -67,11 +75,19 @@ namespace GameOfLife.Services
                 var stateString = string.Join(",", currentState.State.Select(row => string.Join(",", row)));
                 if (seenStates.Contains(stateString))
                 {
+                    _logger.LogInformation("Loop detected for board ID {BoardId} at step {Step}.", board.Id, i);
                     return currentState; // Loop detected, return the state before loop
                 }
                 seenStates.Add(stateString);
-                currentState = GetNextState(currentState);
+                var nextState = GetNextState(currentState);
+                if (IsSameState(currentState, nextState))
+                {
+                    _logger.LogInformation("Stable state reached for board ID {BoardId} at step {Step}.", board.Id, i);
+                    return currentState; // Stable state reached
+                }
+                currentState = nextState;
             }
+            _logger.LogWarning("Board ID {BoardId} did not reach a stable state within {MaxSteps} steps.", board.Id, maxSteps);
             throw new InvalidOperationException("Board does not reach a stable state within the specified max steps.");
         }
 
@@ -90,6 +106,21 @@ namespace GameOfLife.Services
                 }
             }
             return count;
+        }
+
+        private bool IsSameState(GameOfLifeBoard a, GameOfLifeBoard b)
+        {
+            for (int i = 0; i < a.Rows; i++)
+            {
+                for (int j = 0; j < a.Columns; j++)
+                {
+                    if (a.State[i][j] != b.State[i][j])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 }

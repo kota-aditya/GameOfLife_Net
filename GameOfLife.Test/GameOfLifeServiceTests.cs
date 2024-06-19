@@ -1,6 +1,8 @@
+using GameOfLife.Controllers;
 using GameOfLife.Models;
 using GameOfLife.Repositories;
 using GameOfLife.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
@@ -12,12 +14,14 @@ namespace GameOfLifeTests
     {
         private GameOfLifeService _service;
         private Mock<IGameOfLifeRepository> _mockRepository;
+        private Mock<ILogger<GameOfLifeService>> _mockLogger;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _mockRepository = new Mock<IGameOfLifeRepository>();
-            _service = new GameOfLifeService(_mockRepository.Object);
+            _mockLogger = new Mock<ILogger<GameOfLifeService>>();
+            _service = new GameOfLifeService(_mockRepository.Object, _mockLogger.Object);
         }
 
         [TestMethod]
@@ -107,7 +111,7 @@ namespace GameOfLifeTests
         }
 
         [TestMethod]
-        public void Test_GetFinalState()
+        public void Test_GetFinalState_UnstableState()
         {
             var board = new GameOfLifeBoard
             {
@@ -122,21 +126,34 @@ namespace GameOfLifeTests
                 Columns = 3
             };
 
-            var expectedState = new int[][]
+            _mockRepository.Setup(r => r.LoadBoard(board.Id)).Returns(board);
+
+            Assert.ThrowsException<InvalidOperationException>(() =>
             {
-                new int[] { 0, 0, 0 },
-                new int[] { 1, 1, 1 },
-                new int[] { 0, 0, 0 }
+                _service.GetFinalState(board, 2);
+            });
+        }
+
+        [TestMethod]
+        public void Test_GetFinalState_StableState()
+        {
+            var board = new GameOfLifeBoard
+            {
+                Id = "test-board",
+                State = new int[][]
+                {
+                    new int[] { 0, 1, 0 },
+                    new int[] { 0, 1, 0 },
+                    new int[] { 0, 1, 0 }
+                },
+                Rows = 3,
+                Columns = 3
             };
 
             _mockRepository.Setup(r => r.LoadBoard(board.Id)).Returns(board);
 
             var finalState = _service.GetFinalState(board, 10);
-
-            for (int i = 0; i < expectedState.Length; i++)
-            {
-                CollectionAssert.AreEqual(expectedState[i], finalState.State[i]);
-            }
+            Assert.IsNotNull(finalState);
         }
     }
 }

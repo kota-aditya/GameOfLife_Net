@@ -2,6 +2,7 @@
 using GameOfLife.Models;
 using GameOfLife.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -12,12 +13,15 @@ namespace GameOfLifeTests
     {
         private GameOfLifeController _controller;
         private Mock<IGameOfLifeService> _mockService;
+        private Mock<ILogger<GameOfLifeController>> _mockLogger;
+
 
         [TestInitialize]
         public void TestInitialize()
         {
             _mockService = new Mock<IGameOfLifeService>();
-            _controller = new GameOfLifeController(_mockService.Object);
+            _mockLogger = new Mock<ILogger<GameOfLifeController>>();
+            _controller = new GameOfLifeController(_mockService.Object, _mockLogger.Object);
         }
 
         [TestMethod]
