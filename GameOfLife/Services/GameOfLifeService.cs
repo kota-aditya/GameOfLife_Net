@@ -70,26 +70,31 @@ namespace GameOfLife.Services
         {
             var currentState = board;
             var seenStates = new HashSet<string>();
+
             for (int i = 0; i < maxSteps; i++)
             {
+                // Serialize the current state to a string for loop detection
                 var stateString = string.Join(",", currentState.State.Select(row => string.Join(",", row)));
+
+                // Check if the current state has been seen before (loop detection)
                 if (seenStates.Contains(stateString))
                 {
-                    _logger.LogInformation("Loop detected for board ID {BoardId} at step {Step}.", board.Id, i);
-                    return currentState; // Loop detected, return the state before loop
+                    _logger.LogInformation("Loop or stable state detected for board ID {BoardId} at step {Step}.", board.Id, i);
+                    return currentState; // Loop or stable state detected
                 }
+
+                // Add the current state to the set of seen states
                 seenStates.Add(stateString);
-                var nextState = GetNextState(currentState);
-                if (IsSameState(currentState, nextState))
-                {
-                    _logger.LogInformation("Stable state reached for board ID {BoardId} at step {Step}.", board.Id, i);
-                    return currentState; // Stable state reached
-                }
-                currentState = nextState;
+
+                // Get the next state of the board
+                currentState = GetNextState(currentState);
             }
+
+            // If the loop completes without finding a stable state or loop, throw an exception
             _logger.LogWarning("Board ID {BoardId} did not reach a stable state within {MaxSteps} steps.", board.Id, maxSteps);
             throw new InvalidOperationException("Board does not reach a stable state within the specified max steps.");
         }
+
 
         private int CountAliveNeighbors(GameOfLifeBoard board, int row, int col)
         {
@@ -106,21 +111,6 @@ namespace GameOfLife.Services
                 }
             }
             return count;
-        }
-
-        private bool IsSameState(GameOfLifeBoard a, GameOfLifeBoard b)
-        {
-            for (int i = 0; i < a.Rows; i++)
-            {
-                for (int j = 0; j < a.Columns; j++)
-                {
-                    if (a.State[i][j] != b.State[i][j])
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
     }
 }
