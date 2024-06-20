@@ -1,6 +1,29 @@
-@GameOfLife_HostAddress = http://localhost:5255
+### Upload a new board state
+POST http://localhost:5000/api/GameOfLife/upload
+Content-Type: application/json
 
-GET {{GameOfLife_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+  "State": [
+    [0, 1, 0],
+    [0, 1, 0],
+    [0, 1, 0]
+  ],
+  "Rows": 3,
+  "Columns": 3
+}
 
 ###
+
+### Get the next state for a board
+GET http://localhost:5000/api/GameOfLife/{{boardId}}/next
+
+###
+
+### Get the nth state for a board
+GET http://localhost:5000/api/GameOfLife/{{boardId}}/states/5
+
+###
+
+### Get the final state for a board
+GET http://localhost:5000/api/GameOfLife/{{boardId}}/final/10
+
