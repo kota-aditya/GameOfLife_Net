@@ -52,6 +52,8 @@ This project is an implementation of Conway's Game of Life as a RESTful API usin
 
 ### Endpoints
 
+- [Swagger Link](http://localhost:5000/index.html)
+
 #### Upload a New Board State
 
 - **URL:** `/api/GameOfLife/upload`

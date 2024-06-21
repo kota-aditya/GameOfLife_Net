@@ -5,6 +5,9 @@ using System.Text.Json;
 
 namespace GameOfLife.Repositories
 {
+    /// <summary>
+    /// Repository class for managing Game of Life boards stored in the file system.
+    /// </summary>
     public class FileGameOfLifeRepository : IGameOfLifeRepository
     {
         private readonly string _storagePath;
@@ -20,6 +23,10 @@ namespace GameOfLife.Repositories
             }
         }
 
+        /// <summary>
+        /// Saves a board to the file system.
+        /// </summary>
+        /// <param name="board">The board to save.</param>
         public void SaveBoard(GameOfLifeBoard board)
         {
             var filePath = Path.Combine(_storagePath, $"{board.Id}.json");
@@ -28,6 +35,11 @@ namespace GameOfLife.Repositories
             _logger.LogInformation("Board with ID {BoardId} saved to {FilePath}.", board.Id, filePath);
         }
 
+        /// <summary>
+        /// Loads a board from the file system.
+        /// </summary>
+        /// <param name="id">The unique identifier of the board.</param>
+        /// <returns>The board if found; otherwise, null.</returns>
         public GameOfLifeBoard? LoadBoard(string id)
         {
             var filePath = Path.Combine(_storagePath, $"{id}.json");
@@ -41,6 +53,10 @@ namespace GameOfLife.Repositories
             return null;
         }
 
+        /// <summary>
+        /// Deletes a board from the file system.
+        /// </summary>
+        /// <param name="id">The unique identifier of the board.</param>
         public void DeleteBoard(string id)
         {
             var filePath = Path.Combine(_storagePath, $"{id}.json");

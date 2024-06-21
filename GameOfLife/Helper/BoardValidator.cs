@@ -1,36 +1,51 @@
 ﻿using GameOfLife.Models;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace GameOfLife.Helper
+namespace GameOfLife.Validators
 {
     public static class BoardValidator
     {
-        public static bool IsValid(GameOfLifeBoard board, out string errorMessage)
+        /// <summary>
+        /// Validates the GameOfLifeBoard.
+        /// </summary>
+        /// <param name="board">The board to validate.</param>
+        /// <returns>A list of validation results.</returns>
+        public static List<ValidationResult> Validate(GameOfLifeBoard board)
         {
-            errorMessage = string.Empty;
+            var results = new List<ValidationResult>();
+            var context = new ValidationContext(board);
 
-            if (board == null || board.State == null || board.State.Length == 0)
+            Validator.TryValidateObject(board, context, results, true);
+
+            // Custom validations
+
+            // Check if the number of rows in the state matches the Rows property
+            if (board.State.Length != board.Rows)
             {
-                errorMessage = "Board state cannot be null or empty.";
-                return false;
+                results.Add(new ValidationResult("The number of rows in the state does not match the Rows property."));
             }
 
-            int rowLength = board.State[0].Length;
+            // Check if all rows in the state match the Columns property and contain only 0s and 1s
             foreach (var row in board.State)
             {
-                if (row.Length != rowLength)
+                if (row.Length != board.Columns)
                 {
-                    errorMessage = "All rows must have the same number of columns.";
-                    return false;
+                    results.Add(new ValidationResult("One or more rows in the state do not match the Columns property."));
+                    break; // If one row fails the check, we can break early
                 }
-                if (row.Any(cell => cell != 0 && cell != 1))
+
+                foreach (var cell in row)
                 {
-                    errorMessage = "Board state can only contain 0s and 1s.";
-                    return false;
+                    if (cell != 0 && cell != 1)
+                    {
+                        results.Add(new ValidationResult("The board can only contain 0s and 1s."));
+                        break; // If one cell fails the check, we can break early
+                    }
                 }
             }
 
-            return true;
+            return results;
         }
     }
-
 }

@@ -1,11 +1,15 @@
 ﻿using GameOfLife.Models;
 using GameOfLife.Repositories;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GameOfLife.Services
 {
+    /// <summary>
+    /// Service class for managing Game of Life boards.
+    /// </summary>
     public class GameOfLifeService : IGameOfLifeService
     {
         private readonly IGameOfLifeRepository _repository;
@@ -17,6 +21,11 @@ namespace GameOfLife.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// Adds a new board and returns its unique identifier.
+        /// </summary>
+        /// <param name="board">The board to add.</param>
+        /// <returns>The unique identifier of the board.</returns>
         public string AddBoard(GameOfLifeBoard board)
         {
             board.Id = Guid.NewGuid().ToString();
@@ -25,11 +34,21 @@ namespace GameOfLife.Services
             return board.Id;
         }
 
+        /// <summary>
+        /// Retrieves a board by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the board.</param>
+        /// <returns>The board if found; otherwise, null.</returns>
         public GameOfLifeBoard? GetBoard(string id)
         {
             return _repository.LoadBoard(id);
         }
 
+        /// <summary>
+        /// Retrieves the next state of the board based on the current state.
+        /// </summary>
+        /// <param name="board">The current state of the board.</param>
+        /// <returns>The next state of the board.</returns>
         public GameOfLifeBoard GetNextState(GameOfLifeBoard board)
         {
             var newState = new int[board.Rows][];
@@ -41,10 +60,14 @@ namespace GameOfLife.Services
                     int aliveNeighbors = CountAliveNeighbors(board, i, j);
                     if (board.State[i][j] == 1)
                     {
+                        // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+                        // Any live cell with more than three live neighbours dies, as if by overpopulation.
+                        // Any live cell with two or three live neighbours lives on to the next generation.
                         newState[i][j] = (aliveNeighbors < 2 || aliveNeighbors > 3) ? 0 : 1;
                     }
                     else
                     {
+                        // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                         newState[i][j] = (aliveNeighbors == 3) ? 1 : 0;
                     }
                 }
@@ -55,6 +78,12 @@ namespace GameOfLife.Services
             return nextBoard;
         }
 
+        /// <summary>
+        /// Retrieves the state of the board after a specified number of steps.
+        /// </summary>
+        /// <param name="board">The current state of the board.</param>
+        /// <param name="n">The number of steps to calculate.</param>
+        /// <returns>The state of the board after the specified number of steps.</returns>
         public GameOfLifeBoard GetNthState(GameOfLifeBoard board, int n)
         {
             var currentState = board;
@@ -66,6 +95,13 @@ namespace GameOfLife.Services
             return currentState;
         }
 
+        /// <summary>
+        /// Retrieves the final state of the board, which is a stable state or a repeating loop.
+        /// </summary>
+        /// <param name="board">The current state of the board.</param>
+        /// <param name="maxSteps">The maximum number of steps to calculate.</param>
+        /// <returns>The final state of the board.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the board does not reach a stable state within the specified number of steps.</exception>
         public GameOfLifeBoard GetFinalState(GameOfLifeBoard board, int maxSteps)
         {
             var currentState = board;
@@ -79,8 +115,8 @@ namespace GameOfLife.Services
                 // Check if the current state has been seen before (loop detection)
                 if (seenStates.Contains(stateString))
                 {
-                    _logger.LogInformation("Loop or stable state detected for board ID {BoardId} at step {Step}.", board.Id, i);
-                    return currentState; // Loop or stable state detected
+                    _logger.LogInformation("Loop detected for board ID {BoardId} at step {Step}.", board.Id, i);
+                    return currentState; // Loop detected, return the state before loop
                 }
 
                 // Add the current state to the set of seen states
@@ -95,7 +131,13 @@ namespace GameOfLife.Services
             throw new InvalidOperationException("Board does not reach a stable state within the specified max steps.");
         }
 
-
+        /// <summary>
+        /// Counts the number of alive neighbors for a cell at the specified position.
+        /// </summary>
+        /// <param name="board">The current state of the board.</param>
+        /// <param name="row">The row position of the cell.</param>
+        /// <param name="col">The column position of the cell.</param>
+        /// <returns>The number of alive neighbors.</returns>
         private int CountAliveNeighbors(GameOfLifeBoard board, int row, int col)
         {
             int count = 0;
