@@ -135,6 +135,10 @@ This project is an implementation of Conway's Game of Life as a RESTful API usin
     }
     ```
 
+### Additional Notes
+I see a strong reason to implement concurrency. It can acheived in different ways which I can explain when we connect.
+
+
 ### HTTP File for Testing
 
 You can use the following HTTP file (`gameoflife.http`) to test the API endpoints in Visual Studio Code with the REST Client extension or any other HTTP client:
@@ -170,5 +174,3 @@ GET http://localhost:5000/api/GameOfLife/{{boardId}}/states/5
 GET http://localhost:5000/api/GameOfLife/{{boardId}}/final/10
 
 
-## Additional Notes
-I see a strong reason to implement concurrency. It can acheived in different ways which I can explain when we connect.
