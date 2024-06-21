@@ -168,3 +168,7 @@ GET https://localhost:5001/api/GameOfLife/{{boardId}}/states/5
 
 ### Get the final state for a board
 GET https://localhost:5001/api/GameOfLife/{{boardId}}/final/10
+
+
+## Additional Notes
+I see a strong reason to implement concurrency. It can acheived in different ways which I can explain when we connect.
