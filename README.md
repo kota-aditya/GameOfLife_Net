@@ -157,17 +157,17 @@ Content-Type: application/json
 ###
 
 ### Get the next state for a board
-GET https://localhost:5001/api/GameOfLife/{{boardId}}/next
+GET http://localhost:5000/api/GameOfLife/{{boardId}}/next
 
 ###
 
 ### Get the nth state for a board
-GET https://localhost:5001/api/GameOfLife/{{boardId}}/states/5
+GET http://localhost:5000/api/GameOfLife/{{boardId}}/states/5
 
 ###
 
 ### Get the final state for a board
-GET https://localhost:5001/api/GameOfLife/{{boardId}}/final/10
+GET http://localhost:5000/api/GameOfLife/{{boardId}}/final/10
 
 
 ## Additional Notes
