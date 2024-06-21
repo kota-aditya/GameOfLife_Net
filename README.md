@@ -136,7 +136,7 @@ This project is an implementation of Conway's Game of Life as a RESTful API usin
     ```
 
 ### Additional Notes
-I see a strong reason to implement concurrency. It can acheived in different ways which I can explain when we connect.
+I see a strong reason to implement concurrency. It can be acheived in different ways which I can explain when we connect.
 
 
 ### HTTP File for Testing
