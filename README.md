@@ -22,8 +22,8 @@ This project is an implementation of Conway's Game of Life as a RESTful API usin
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/game-of-life-api.git
-    cd game-of-life-api
+    git clone https://github.com/kota-aditya/GameOfLife_Net.git
+    cd GameOfLife_Net
     ```
 
 2. **Open the project in Visual Studio:**
